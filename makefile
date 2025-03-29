@@ -3,5 +3,5 @@
 build:
 	./gradlew clean build
 
-run:
+run: build
 	./gradlew runMockServer
