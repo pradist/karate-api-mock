@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1' // ใช้ Shadow Plugin
+}
+
+group = 'org.example.mock'
+version = '1.4.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.intuit.karate:karate-core:1.4.0'
+    testImplementation 'com.intuit.karate:karate-junit5:1.4.0'
+}
+
+// กำหนด Main-Class สำหรับ JAR
+application {
+    mainClass = 'org.example.mock.KarateMockRunner'
+}
+
+// ใช้ Shadow Plugin เพื่อสร้าง Executable JAR
+tasks.named("shadowJar") {
+    archiveBaseName.set('karate-api-mock')
+    archiveClassifier.set('')
+    archiveVersion.set('1.4.0-SNAPSHOT')
+    manifest {
+        attributes 'Main-Class': 'org.example.mock.KarateMockRunner'
+    }
+    dependsOn classes // หรือเอาออกหมดเลยถ้าไม่จำเป็น
+}
+
+// **ปิดการใช้งาน Task ที่ทำให้เกิด Circular Dependency**
+tasks.named("shadowDistTar").configure { enabled = false }
+tasks.named("shadowDistZip").configure { enabled = false }
+tasks.named("startShadowScripts").configure { enabled = false }
+tasks.named("distTar").configure { enabled = false }
+tasks.named("distZip").configure { enabled = false }
+tasks.named("startScripts").configure { enabled = false }
+
+// ปิดการใช้งาน `jar` เพราะเราจะใช้ `shadowJar` แทน
+tasks.named("jar") {
+    enabled = false
+}
+
+tasks.register('runMockServer', JavaExec) {
+    group = "application"
+    description = "Run Karate Mock API Server"
+    mainClass = 'org.example.mock.KarateMockRunner'
+    classpath = sourceSets.main.runtimeClasspath
+}
