@@ -1,0 +1,3 @@
+GET http://localhost:8080/api/mock
+Content-Type: application/json
+
